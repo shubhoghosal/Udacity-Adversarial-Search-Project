@@ -29,7 +29,7 @@ def min_value(gameState, alpha, beta, depth):
         return gameState.utility(0)
     
     if depth <= 0:
-        return my_moves(gameState)
+        return score(gameState) #my_moves(gameState)
 
     v = float("inf")
     for a in gameState.actions():
@@ -51,7 +51,7 @@ def max_value(gameState, alpha, beta, depth):
         return gameState.utility(0)
     
     if depth <= 0:
-        return my_moves(gameState)
+        return score(gameState) #my_moves(gameState)
     
     v = float("-inf")
     for a in gameState.actions():
@@ -66,3 +66,10 @@ def max_value(gameState, alpha, beta, depth):
 def my_moves(gameState):
     loc = gameState.locs[player_id]
     return len(gameState.liberties(loc))
+
+def score(self, state):
+    own_loc = state.locs[self.player_id]
+    opp_loc = state.locs[1 - self.player_id]
+    own_liberties = state.liberties(own_loc)
+    opp_liberties = state.liberties(opp_loc)
+    return len(own_liberties) - len(opp_liberties)
