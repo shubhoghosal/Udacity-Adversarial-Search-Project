@@ -2,6 +2,7 @@
 from sample_players import DataPlayer
 from minimax_iterative_deepening import *
 from alpha_beta_search import *
+import random
 
 
 class CustomPlayer(DataPlayer):

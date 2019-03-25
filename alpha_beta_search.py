@@ -1,4 +1,4 @@
-def alpha_beta_search(gameState):
+def alpha_beta_search(gameState, player_id, depth):
     """ Return the move along a branch of the game tree that
     has the best possible value.  A move is a pair of coordinates
     in (column, row) order corresponding to a legal move for
@@ -12,7 +12,7 @@ def alpha_beta_search(gameState):
     best_score = float("-inf")
     best_move = None
     for a in gameState.actions():
-        v = min_value(gameState.result(a), alpha, beta)
+        v = min_value(gameState.result(a), alpha, beta, depth)
         alpha = max(alpha, v)
         if v > best_score:
             best_score = v
@@ -20,7 +20,7 @@ def alpha_beta_search(gameState):
     return best_move
 
 # TODO: modify the function signature to accept an alpha and beta parameter
-def min_value(gameState, alpha, beta):
+def min_value(gameState, alpha, beta, depth):
     """ Return the value for a win (+1) if the game is over,
     otherwise return the minimum value over all legal child
     nodes.
@@ -28,10 +28,13 @@ def min_value(gameState, alpha, beta):
     if gameState.terminal_test():
         return gameState.utility(0)
     
+    if depth <= 0:
+        return my_moves(gameState)
+
     v = float("inf")
     for a in gameState.actions():
         # TODO: modify the call to max_value()
-        v = min(v, max_value(gameState.result(a), alpha, beta))
+        v = min(v, max_value(gameState.result(a), alpha, beta, depth))
         # TODO: update the value bound
         if v <= alpha:
             return v
@@ -39,7 +42,7 @@ def min_value(gameState, alpha, beta):
     return v
 
 # TODO: modify the function signature to accept an alpha and beta parameter
-def max_value(gameState, alpha, beta):
+def max_value(gameState, alpha, beta, depth):
     """ Return the value for a loss (-1) if the game is over,
     otherwise return the maximum value over all legal child
     nodes.
@@ -47,12 +50,19 @@ def max_value(gameState, alpha, beta):
     if gameState.terminal_test():
         return gameState.utility(0)
     
+    if depth <= 0:
+        return my_moves(gameState)
+    
     v = float("-inf")
     for a in gameState.actions():
         # TODO: modify the call to min_value()
-        v = max(v, min_value(gameState.result(a), alpha, beta))
+        v = max(v, min_value(gameState.result(a), alpha, beta, depth))
         # TODO: update the value bound
         if v >= beta:
             return v
         alpha = max(alpha, v)
     return v
+
+def my_moves(gameState):
+    loc = gameState.locs[player_id]
+    return len(gameState.liberties(loc))
