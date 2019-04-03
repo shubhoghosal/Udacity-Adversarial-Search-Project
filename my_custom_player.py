@@ -1,101 +1,101 @@
 
 from sample_players import DataPlayer
 import random
-from minimax import *
 
 class CustomPlayer_Random(DataPlayer):
-    """ Implement your own agent to play knight's Isolation
 
-    The get_action() method is the only required method for this project.
-    You can modify the interface for get_action by adding named parameters
-    with default values, but the function MUST remain compatible with the
-    default interface.
-
-    **********************************************************************
-    NOTES:
-    - The test cases will NOT be run on a machine with GPU access, nor be
-      suitable for using any other machine learning techniques.
-
-    - You can pass state forward to your agent on the next turn by assigning
-      any pickleable object to the self.context attribute.
-    **********************************************************************
-    """
     def get_action(self, state):
-        """ Employ an adversarial search technique to choose an action
-        available in the current state calls self.queue.put(ACTION) at least
 
-        This method must call self.queue.put(ACTION) at least once, and may
-        call it as many times as you want; the caller will be responsible
-        for cutting off the function after the search time limit has expired.
-
-        See RandomPlayer and GreedyPlayer in sample_players for more examples.
-
-        **********************************************************************
-        NOTE: 
-        - The caller is responsible for cutting off search, so calling
-          get_action() from your own code will create an infinite loop!
-          Refer to (and use!) the Isolation.play() function to run games.
-        **********************************************************************
-        """
-        # TODO: Replace the example implementation below with your own search
-        #       method by combining techniques from lecture
-        #
-        # EXAMPLE: choose a random move without any search--this function MUST
-        #          call self.queue.put(ACTION) at least once before time expires
-        #          (the timer is automatically managed for you)
-        print("State: ", state)
-        print("Player: ", state.player())
-        print("Entering get action")
         self.queue.put(random.choice(state.actions()))
 
 class CustomPlayer_Minimax(DataPlayer):
-    """ Implement your own agent to play knight's Isolation
 
-    The get_action() method is the only required method for this project.
-    You can modify the interface for get_action by adding named parameters
-    with default values, but the function MUST remain compatible with the
-    default interface.
-
-    **********************************************************************
-    NOTES:
-    - The test cases will NOT be run on a machine with GPU access, nor be
-      suitable for using any other machine learning techniques.
-
-    - You can pass state forward to your agent on the next turn by assigning
-      any pickleable object to the self.context attribute.
-    **********************************************************************
-    """
     def get_action(self, state):
-        """ Employ an adversarial search technique to choose an action
-        available in the current state calls self.queue.put(ACTION) at least
 
-        This method must call self.queue.put(ACTION) at least once, and may
-        call it as many times as you want; the caller will be responsible
-        for cutting off the function after the search time limit has expired.
-
-        See RandomPlayer and GreedyPlayer in sample_players for more examples.
-
-        **********************************************************************
-        NOTE: 
-        - The caller is responsible for cutting off search, so calling
-          get_action() from your own code will create an infinite loop!
-          Refer to (and use!) the Isolation.play() function to run games.
-        **********************************************************************
-        """
-        # TODO: Replace the example implementation below with your own search
-        #       method by combining techniques from lecture
-        #
-        # EXAMPLE: choose a random move without any search--this function MUST
-        #          call self.queue.put(ACTION) at least once before time expires
-        #          (the timer is automatically managed for you)
         print("Entering get action")
         print("State: ", state)
-        print("Player: ", state.player())
+        print("Player: ", self.player_id)
         if state.ply_count <=1:
             print("Adding random choice to self queue")
             self.queue.put(random.choice(state.actions()))
         else:
             print("Adding Minimax choice to self queue")
-            self.queue.put(minimax_decision(state))
+            self.queue.put(self.minimax(state, depth=2))
+
+    def minimax(self, state, depth):
+
+        def min_value(state, depth):
+
+            print("Entering Min Value")
+            print("Player: ", self.player_id)
+
+            if state.terminal_test():
+                print("Terminal state reached in Min Value.")
+                print("Returning value from Min Value: ", state.utility(self.player_id))
+                print("Exiting Min Value.")
+                return state.utility(self.player_id)
+            if depth <= 0: 
+                print("Depth Limit Reached.")
+                print("Score: ", self.score(state))
+                print("Exiting Min Value.")
+                return self.score(state)
+            value = float("inf")
+            for action in state.actions():
+                print("Next Action in Min Value: ", action)
+                print("Result: ", state.result(action))
+                value = min(value, max_value(state.result(action), depth - 1))
+
+            print("Returning value from Min Value: ", value)
+            print("Exiting Min Value")
+            return value
+
+
+        def max_value(state, depth):
+
+            print("Entering Max Value")
+            print("Player: ", self.player_id)
+
+            if state.terminal_test():
+                print("Terminal state reached in Max Value.")
+                print("Returning value from Max Value: ", state.utility(self.player_id))
+                print("Exiting Max Value.")
+                return state.utility(self.player_id)
+            if depth <= 0: 
+                print("Depth Limit Reached.")
+                print("Score: ", self.score(state))
+                print("Exiting Max Value.")
+                return self.score(state)
+            value = float("-inf")
+            for action in state.actions():
+                print("Next Action in Max Value: ", action)
+                print("Result: ", state.result(action))
+                value = max(value, min_value(state.result(action), depth -1))
+
+            print("Returning value from Max Value: ", value)
+            print("Exiting Max Value.")
+            return value
+
+        print("Entering Minimax")
+        print("Player: ", self.player_id)
+        best_score = float("-inf")
+        best_move = None
+        moves = {}
+        for action in state.actions():
+            print("Next Action in Minimax: ", action)
+            print("Result: ", state.result(action))
+            value = min_value(state.result(action), depth -1)
+            moves.update({action: value})
+        max_score = max([score for move, score in moves.items()])
+        best_moves = [move for move, score in moves.items() if score == max_score]
+        print("Best Moves: ", best_moves)
+        print("Exiting Minimax")
+        return max(best_moves)
+
+    def score(self, state):
+        current_player_loc = state.locs[self.player_id]
+        opponent_player_loc = state.locs[1 - self.player_id]
+        current_player_liberties = state.liberties(current_player_loc)
+        opponent_player_liberties = state.liberties(opponent_player_loc)
+        return len(current_player_liberties) - len(opponent_player_liberties)
 
 CustomPlayer = CustomPlayer_Minimax
